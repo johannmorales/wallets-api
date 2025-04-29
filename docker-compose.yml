@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  wallets-db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+  wallets-redis:
+    image: redis:latest
+    ports:
+      - "${REDIS_PORT}:6379"

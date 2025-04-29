@@ -1,0 +1,77 @@
+config:
+  target: "http://localhost:4001"  # Adjust if needed
+  phases:
+    # Phase 1: Rapid ramp-up to 1000 users in 30 seconds
+    - duration: 10
+      arrivalRate: 33  # 33 new users per second, rapidly ramping up
+      name: "Rapid Ramp-up Phase"
+
+    # Phase 2: Sustain high traffic at 1000 users per second for 30 seconds
+    - duration: 30
+      arrivalRate: 1000  # Sustaining high traffic at 1000 users per second
+      name: "Sustain Max Traffic"
+
+    # Phase 3: Sustained 1000 users per second for 30 more seconds
+    - duration: 30
+      arrivalRate: 1000
+      name: "Max Traffic Phase"
+
+  defaults:
+    headers:
+      Content-Type: application/json
+  processor: './hooks.js'  # Ensure the hook is properly referenced
+
+scenarios:
+  - name: "Full Authenticated User Flow"
+    flow:
+      - function: "generateUser"  # This will call the generateUser function from hooks.js
+
+      - post:
+          url: "/signup"
+          json:
+            email: "{{ email }}"
+            password: "{{ password }}"
+
+      - post:
+          url: "/login"
+          json:
+            email: "{{ email }}"
+            password: "{{ password }}"
+          capture:
+            - json: "$.accessToken"
+              as: accessToken
+
+      - post:
+          url: "/wallets"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          json:
+            address: "0x1234567890abcdef1234567890abcdef12345678"
+            chain: "ETHEREUM"
+            tag: "Test Wallet"
+          capture:
+            - json: "$.id"
+              as: walletId
+
+      - get:
+          url: "/wallets/{{ walletId }}"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+
+      - patch:
+          url: "/wallets/{{ walletId }}"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          json:
+            address: "0x{{ $randomString(40, 'abcdef0123456789') }}"
+            chain: "ETHEREUM"
+            tag: "Updated Wallet"
+
+      - delete:
+          url: "/wallets/{{ walletId }}"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+
+plugins:
+  faker: {}
+
