@@ -74,3 +74,9 @@ Use ChatGPT to do straight forward tasks
 - Validation methods
 - Controller methods 
 Helped reduced the overall development time and allowed me to have more time to think about best technologies to use and how to structure the architecture instead of writing repetitive code
+
+# Next steps / Other
+
+- Deployment can be done by dockerizing application and deploying in any cloud provider (eg. via a Github Action)
+- Services used can be generated using terrafom / ansible
+- .env shouldnt be on source control it is only there for simplicty of the test. Should change to safer alternative (vaults)
